@@ -66,15 +66,15 @@ import org.nuxeo.ecm.core.api.repository.RepositoryManager;
 import org.nuxeo.ecm.core.schema.SchemaManager;
 import org.nuxeo.ecm.core.schema.types.Schema;
 import org.nuxeo.ecm.core.security.SecurityService;
-import org.nuxeo.ecm.core.storage.State.ListDiff;
-import org.nuxeo.ecm.core.storage.State.StateDiff;
-import org.nuxeo.ecm.core.storage.StateHelper;
 import org.nuxeo.ecm.core.storage.DefaultFulltextParser;
 import org.nuxeo.ecm.core.storage.FulltextConfiguration;
 import org.nuxeo.ecm.core.storage.FulltextParser;
 import org.nuxeo.ecm.core.storage.FulltextUpdaterWork;
-import org.nuxeo.ecm.core.storage.State;
 import org.nuxeo.ecm.core.storage.FulltextUpdaterWork.IndexAndText;
+import org.nuxeo.ecm.core.storage.State;
+import org.nuxeo.ecm.core.storage.State.ListDiff;
+import org.nuxeo.ecm.core.storage.State.StateDiff;
+import org.nuxeo.ecm.core.storage.StateHelper;
 import org.nuxeo.ecm.core.work.api.Work;
 import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.core.work.api.WorkManager.Scheduling;
@@ -103,10 +103,10 @@ public class DBSTransactionState {
     protected final DBSSession session;
 
     /** Retrieved and created document state. */
-    protected Map<String, DBSDocumentState> transientStates = new HashMap<String, DBSDocumentState>();
+    protected Map<String, DBSDocumentState> transientStates = new HashMap<>();
 
     /** Ids of documents created but not yet saved. */
-    protected Set<String> transientCreated = new LinkedHashSet<String>();
+    protected Set<String> transientCreated = new LinkedHashSet<>();
 
     /**
      * Undo log.
@@ -181,7 +181,7 @@ public class DBSTransactionState {
      */
     public List<DBSDocumentState> getStatesForUpdate(List<String> ids) {
         // check which ones we have to fetch from repository
-        List<String> idsToFetch = new LinkedList<String>();
+        List<String> idsToFetch = new LinkedList<>();
         for (String id : ids) {
             // check transient state
             DBSDocumentState docState = transientStates.get(id);
@@ -198,7 +198,7 @@ public class DBSTransactionState {
             }
         }
         // everything now fetched in transient
-        List<DBSDocumentState> docStates = new ArrayList<DBSDocumentState>(ids.size());
+        List<DBSDocumentState> docStates = new ArrayList<>(ids.size());
         for (String id : ids) {
             DBSDocumentState docState = transientStates.get(id);
             if (docState == null) {
@@ -214,7 +214,7 @@ public class DBSTransactionState {
 
     // XXX TODO for update or for read?
     public DBSDocumentState getChildState(String parentId, String name) {
-        Set<String> seen = new HashSet<String>();
+        Set<String> seen = new HashSet<>();
         // check transient state
         for (DBSDocumentState docState : transientStates.values()) {
             seen.add(docState.getId());
@@ -247,8 +247,8 @@ public class DBSTransactionState {
     }
 
     public List<DBSDocumentState> getChildrenStates(String parentId) {
-        List<DBSDocumentState> docStates = new LinkedList<DBSDocumentState>();
-        Set<String> seen = new HashSet<String>();
+        List<DBSDocumentState> docStates = new LinkedList<>();
+        Set<String> seen = new HashSet<>();
         // check transient state
         for (DBSDocumentState docState : transientStates.values()) {
             seen.add(docState.getId());
@@ -266,8 +266,8 @@ public class DBSTransactionState {
     }
 
     public List<String> getChildrenIds(String parentId) {
-        List<String> children = new ArrayList<String>();
-        Set<String> seen = new HashSet<String>();
+        List<String> children = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
         // check transient state
         for (DBSDocumentState docState : transientStates.values()) {
             String id = docState.getId();
@@ -282,11 +282,11 @@ public class DBSTransactionState {
         for (State state : states) {
             children.add((String) state.get(KEY_ID));
         }
-        return new ArrayList<String>(children);
+        return new ArrayList<>(children);
     }
 
     public boolean hasChildren(String parentId) {
-        Set<String> seen = new HashSet<String>();
+        Set<String> seen = new HashSet<>();
         // check transient state
         for (DBSDocumentState docState : transientStates.values()) {
             seen.add(docState.getId());
@@ -453,15 +453,15 @@ public class DBSTransactionState {
      * @param targetProxies returns a map of target to proxies among the document found
      */
     protected Set<String> getSubTree(String id, Map<String, String> proxyTargets, Map<String, Object[]> targetProxies) {
-        Set<String> ids = new HashSet<String>();
+        Set<String> ids = new HashSet<>();
         // check repository
         repository.queryKeyValueArray(KEY_ANCESTOR_IDS, id, ids, proxyTargets, targetProxies);
         return ids;
     }
 
     public List<DBSDocumentState> getKeyValuedStates(String key, Object value) {
-        List<DBSDocumentState> docStates = new LinkedList<DBSDocumentState>();
-        Set<String> seen = new HashSet<String>();
+        List<DBSDocumentState> docStates = new LinkedList<>();
+        Set<String> seen = new HashSet<>();
         // check transient state
         for (DBSDocumentState docState : transientStates.values()) {
             seen.add(docState.getId());
@@ -479,8 +479,8 @@ public class DBSTransactionState {
     }
 
     public List<DBSDocumentState> getKeyValuedStates(String key1, Object value1, String key2, Object value2) {
-        List<DBSDocumentState> docStates = new LinkedList<DBSDocumentState>();
-        Set<String> seen = new HashSet<String>();
+        List<DBSDocumentState> docStates = new LinkedList<>();
+        Set<String> seen = new HashSet<>();
         // check transient state
         for (DBSDocumentState docState : transientStates.values()) {
             seen.add(docState.getId());
@@ -704,7 +704,7 @@ public class DBSTransactionState {
      * @since 7.4
      */
     public void begin() {
-        undoLog = new HashMap<String, State>();
+        undoLog = new HashMap<>();
     }
 
     /**
@@ -747,13 +747,13 @@ public class DBSTransactionState {
      * @return a list of {@link Work} instances to schedule post-commit.
      */
     protected List<Work> getFulltextWorks() {
-        Set<String> docsWithDirtyStrings = new HashSet<String>();
-        Set<String> docsWithDirtyBinaries = new HashSet<String>();
+        Set<String> docsWithDirtyStrings = new HashSet<>();
+        Set<String> docsWithDirtyBinaries = new HashSet<>();
         findDirtyDocuments(docsWithDirtyStrings, docsWithDirtyBinaries);
         if (docsWithDirtyStrings.isEmpty() && docsWithDirtyBinaries.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Work> works = new LinkedList<Work>();
+        List<Work> works = new LinkedList<>();
         getFulltextSimpleWorks(works, docsWithDirtyStrings);
         getFulltextBinariesWorks(works, docsWithDirtyBinaries);
         return works;
@@ -795,7 +795,7 @@ public class DBSTransactionState {
                         break;
                     }
                 }
-                Set<String> indexesBinary= fulltextConfiguration.indexesByPropPathBinary.get(path);
+                Set<String> indexesBinary = fulltextConfiguration.indexesByPropPathBinary.get(path);
                 if (indexesBinary != null && !indexesBinary.isEmpty()) {
                     dirtyBinaries = true;
                     if (dirtyStrings) {
@@ -904,7 +904,7 @@ public class DBSTransactionState {
             }
             docState.put(KEY_FULLTEXT_JOBID, docState.getId());
             FulltextFinder fulltextFinder = new FulltextFinder(fulltextParser, docState, session);
-            List<IndexAndText> indexesAndText = new LinkedList<IndexAndText>();
+            List<IndexAndText> indexesAndText = new LinkedList<>();
             for (String indexName : fulltextConfiguration.indexNames) {
                 // TODO paths from config
                 String text = fulltextFinder.findFulltext(indexName);
@@ -982,7 +982,7 @@ public class DBSTransactionState {
         public String findFulltext(String indexName) {
             // TODO indexName
             // TODO paths
-            List<String> strings = new ArrayList<String>();
+            List<String> strings = new ArrayList<>();
             findFulltext(indexName, document.getState(), strings);
             return StringUtils.join(strings, ' ');
         }
